@@ -4,7 +4,10 @@ from colored import *
 color1 = fg('cyan')
 color2 = fg('red')
 color3 = fg('green')
+color4 = fg(172)
 reset = attr('reset')
+
+# logique
 
 class Ligne():
 
@@ -15,17 +18,29 @@ class Ligne():
         self.ligne = ["0","0","0","0","0","0","0"]
         self.list_inst_ligne.append(self)
 
+# afficher le tableau
+
     def display_board():
+
+        numéro_colonne = "\n"+color4+"1"+reset+"|"+color4+"2"+reset+"|"+color4+"3"+reset+"|"+color4+"4"+reset+"|"+color4+"5"+reset+"|"+color4+"6"+reset+"|"+color4+"7"+reset+"\n"
+
         x = 1
+
+        print(numéro_colonne)
+
         for inst in Ligne.list_inst_ligne:
             ligne = Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-x].ligne.copy()
             while "1" in ligne :
                 ligne[ligne.index("1")] = color1+"1"+reset
             while "2" in ligne :
                 ligne[ligne.index("2")] = color2+"2"+reset
-            affichage = "|".join(ligne)
-            print(affichage)
+            tableau = "|".join(ligne)
+            print(tableau)
             x += 1
+
+        print(numéro_colonne)
+
+#chosir ligne
 
     def action():
         global turn
@@ -33,33 +48,23 @@ class Ligne():
         print("\n")
         Ligne.display_board()
         choix = input("\n > ")
-        if choix == "1" :
-            Ligne.choose_ligne(1)
-        elif choix == "2":
-            Ligne.choose_ligne(2)
-        elif choix == "3":
-            Ligne.choose_ligne(3)
-        elif choix == "4":
-            Ligne.choose_ligne(4)
-        elif choix == "5":
-            Ligne.choose_ligne(5)
-        elif choix == "6":
-            Ligne.choose_ligne(6)
-        elif choix == "7":
-            Ligne.choose_ligne(7)
+        if choix.isdigit() :
+            Ligne.choose_ligne_token(int(choix))
         elif choix == "stop":
             running = False
             pass
+        else :
+            Ligne.action()
 
 
         Ligne.verification_win()
 
-    def choose_ligne(colonne):
+# deposer jeton
+
+    def choose_ligne_token(colonne):
+
         global turn
-        if turn == "1" :
-            turn = "2"
-        else :
-            turn = "1"
+
         if colonne > 7 :
             colonne = 7
         elif colonne < 1 :
@@ -76,7 +81,33 @@ class Ligne():
                 print(turn)
                 break
 
+# verification win
+
     def verification_win():
+
+        Ligne.horrizontal_win()
+
+        for ligne in range(len(ligne1.ligne)-3) :
+            Ligne.win_diag_vert(0, ligne)
+
+        for ligne in range(len(ligne1.ligne)-3) :
+            Ligne.win_diag_vert(1, ligne)
+
+        for ligne in range(3, len(ligne1.ligne)) :
+            Ligne.win_diag_vert(-1, ligne)
+
+# diagonales et verticale
+
+    def win_diag_vert(calc, ligne):
+        for i in range(len(ligne1.ligne)-4):
+            if Ligne.list_inst_ligne[i].ligne[ligne] in ["1","2"] and Ligne.list_inst_ligne[i].ligne[ligne] == Ligne.list_inst_ligne[i+1].ligne[ligne+calc] == Ligne.list_inst_ligne[i+2].ligne[ligne+calc*2] == Ligne.list_inst_ligne[i+3].ligne[ligne+calc*3]:
+                Ligne.surbrillance_win(calc, i, ligne)
+                Ligne.win()
+                break
+
+# horizontale
+
+    def horrizontal_win():
 
         for ligne in Ligne.list_inst_ligne :
             for i in range(len(ligne.ligne)-3):
@@ -87,41 +118,23 @@ class Ligne():
                     Ligne.win()
                     break
 
-        for ligne in range(len(ligne1.ligne)-3) :
-            for i in range(len(ligne1.ligne)-4):
-                if Ligne.list_inst_ligne[i].ligne[ligne] in ["1","2"] and Ligne.list_inst_ligne[i].ligne[ligne] == Ligne.list_inst_ligne[i+1].ligne[ligne] == Ligne.list_inst_ligne[i+2].ligne[ligne] == Ligne.list_inst_ligne[i+3].ligne[ligne]:
-                    for itération in range(4) :
-                        Ligne.list_inst_ligne[i].ligne[ligne] = color3+Ligne.list_inst_ligne[i].ligne[ligne]+reset
-                        i +=1
-                    Ligne.win()
-                    break
+# mettre en surbrillance la ligne de 4
 
-        for ligne in range(len(ligne1.ligne)-3) :
-            for i in range(len(ligne1.ligne)-4):
-                if Ligne.list_inst_ligne[i].ligne[ligne] in ["1","2"] and Ligne.list_inst_ligne[i].ligne[ligne] == Ligne.list_inst_ligne[i+1].ligne[ligne+1] == Ligne.list_inst_ligne[i+2].ligne[ligne+2] == Ligne.list_inst_ligne[i+3].ligne[ligne+3] :
-                    for itération in range(4) :
-                        Ligne.list_inst_ligne[i].ligne[ligne] = color3+Ligne.list_inst_ligne[i].ligne[ligne]+reset
-                        i +=1
-                        ligne += 1
-                    Ligne.win()
-                    break
+    def surbrillance_win(lign_op, i, ligne):
+        for itération in range(4) :
+            Ligne.list_inst_ligne[i].ligne[ligne] = color3+Ligne.list_inst_ligne[i].ligne[ligne]+reset
+            i +=1
+            ligne += lign_op
 
-
-        for ligne in range(3, len(ligne1.ligne)) :
-            for i in range(len(ligne1.ligne)-4):
-                if Ligne.list_inst_ligne[i].ligne[ligne] in ["1","2"] and Ligne.list_inst_ligne[i].ligne[ligne] == Ligne.list_inst_ligne[i+1].ligne[ligne-1] == Ligne.list_inst_ligne[i+2].ligne[ligne-2] == Ligne.list_inst_ligne[i+3].ligne[ligne-3]:
-                    for itération in range(4) :
-                        Ligne.list_inst_ligne[i].ligne[ligne] = color3+Ligne.list_inst_ligne[i].ligne[ligne]+reset
-                        i +=1
-                        ligne -= 1
-                    Ligne.win()
-                    break
+# si victoire
 
     def win():
         global running
         Ligne.display_board()
         print("\n"+color3+"WIN"+reset+"\n")
         running = False
+
+# instansiation des lignes
 
 ligne6 = Ligne(6)
 ligne5 = Ligne(5)
@@ -132,7 +145,15 @@ ligne1 = Ligne(1)
 
 running = True
 
-turn = "2"
+turn = ""
+
+# game loop
 
 while running :
+
+    if turn == "1":
+        turn = "2"
+    else :
+        turn = "1"
+
     Ligne.action()

@@ -54,7 +54,11 @@ class Ligne():
 
     def ia_move():
 
+        # verifie si l'ia peut empecher l'adversaire de gagner ou de gagner elle meme
+
         for win_loose in ["1","2"] :
+
+            #horizontale
 
             for ligne in Ligne.list_inst_ligne :
                 for i in range(len(ligne.ligne)-3):
@@ -62,12 +66,16 @@ class Ligne():
                         Ligne.choose_ligne_token(i+4, "2")
                         return
 
+            # verticale
+
             for ligne in range(len(ligne1.ligne)) :
                 for i in range(len(ligne1.ligne)-4):
                     temp = [Ligne.list_inst_ligne[i+x].ligne[ligne] for x in range(3)]
                     if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne] =="0" :
                         Ligne.choose_ligne_token(ligne+1, "2")
                         return
+
+            #diagonales
 
             for ligne in range(len(ligne1.ligne)-3) :
                 for i in range(len(ligne1.ligne)-4):
@@ -83,11 +91,21 @@ class Ligne():
                         Ligne.choose_ligne_token(ligne-2, "2")
                         return
 
+        # si on ne peut pas bloquer une win ou win jouer "aléatoirement"
 
-        # si on ne peut pas bloquer une win ou win jouer aléatoirement
+        choix = None
 
-        choix = randint(2,6)
-        while Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-1].ligne[int(choix)-1] in ["1", "2"] :
+        con = randint(0,3)
+        if not con :
+            choix = randint(3,5)
+        else :
+            con = randint(0,1)
+            if not con :
+                choix = randint(2,6)
+            else :
+                choix = randint(1,7)
+
+        while Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-1].ligne[choix-1] in ["1", "2"] :
             choix = randint(1,7)
         else :
             Ligne.choose_ligne_token(choix, "2")

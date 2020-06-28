@@ -1,5 +1,9 @@
 
+from random import *
+
 from colored import *
+
+import time
 
 color1 = fg('cyan')
 color2 = fg('red')
@@ -22,7 +26,7 @@ class Ligne():
 
     def display_board():
 
-        numéro_colonne = "\n"+color4+"1"+reset+"|"+color4+"2"+reset+"|"+color4+"3"+reset+"|"+color4+"4"+reset+"|"+color4+"5"+reset+"|"+color4+"6"+reset+"|"+color4+"7"+reset+"\n"
+        numéro_colonne = "|".join([f"{color4 + str(i) + reset}" for i in range(1, 8)])
 
         x = 1
 
@@ -42,28 +46,57 @@ class Ligne():
 
 #chosir ligne
 
+    def ia_move():
+
+        # blocage
+
+        for ligne in Ligne.list_inst_ligne :
+            for i in range(len(ligne.ligne)-3):
+                if ligne.ligne[i:i+3] == ["1"]*3 and ligne.ligne[i+3] == "0" :
+                    print("debug bloque")
+                    Ligne.choose_ligne_token(i+4, "2")
+                    Ligne.verification_win("ia")
+                    return
+
+        # winnage
+
+        for ligne in Ligne.list_inst_ligne :
+            for i in range(len(ligne.ligne)-3):
+                if ligne.ligne[i:i+3] == ["2"]*3 and ligne.ligne[i+3] == "0" :
+                    print("debug win")
+                    Ligne.choose_ligne_token(i+4, "2")
+                    Ligne.verification_win("ia")
+                    return
+
+        # si on ne peut pas bloquer une win ou win jouer aléatoirement
+
+        choix = randint(1,7)
+        while Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-1].ligne[int(choix)-1] in ["1", "2"] :
+            print("debug choix")
+            choix = randint(1,7)
+        else :
+            Ligne.choose_ligne_token(choix, "2")
+            Ligne.verification_win("ia")
+
     def action():
         global turn
         global running
-        print("\n")
-        Ligne.display_board()
         choix = input("\n > ")
-        if choix.isdigit() :
-            Ligne.choose_ligne_token(int(choix))
+        if choix.isdigit():
+            for ligne in Ligne.list_inst_ligne :
+                if Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-1].ligne[int(choix)-1] in ["1", "2"] :
+                    Ligne.action()
+            Ligne.choose_ligne_token(int(choix), "1")
+            Ligne.verification_win("player")
         elif choix == "stop":
             running = False
-            pass
+            return
         else :
             Ligne.action()
 
-
-        Ligne.verification_win()
-
 # deposer jeton
 
-    def choose_ligne_token(colonne):
-
-        global turn
+    def choose_ligne_token(colonne, player):
 
         if colonne > 7 :
             colonne = 7
@@ -71,51 +104,51 @@ class Ligne():
             colonne = 1
 
         for ligne in Ligne.list_inst_ligne :
-            if Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-1].ligne[colonne-1] == "1" :
-                print("debug")
-                break
-            elif ligne.ligne[colonne-1] == "1" or ligne.ligne[colonne-1] == "2" :
+
+            if ligne.ligne[colonne-1] == "1" or ligne.ligne[colonne-1] == "2" :
                 pass
             else :
-                ligne.ligne[colonne-1] = turn
-                print(turn)
+                ligne.ligne[colonne-1] = player
                 break
 
 # verification win
 
-    def verification_win():
+    def verification_win(player):
 
-        Ligne.horrizontal_win()
+        Ligne.horrizontal_win(player)
+
+        for ligne in range(len(ligne1.ligne)) :
+            Ligne.win_diag(0, ligne, player)
 
         for ligne in range(len(ligne1.ligne)-3) :
-            Ligne.win_diag_vert(0, ligne)
-
-        for ligne in range(len(ligne1.ligne)-3) :
-            Ligne.win_diag_vert(1, ligne)
+            Ligne.win_diag(1, ligne, player)
 
         for ligne in range(3, len(ligne1.ligne)) :
-            Ligne.win_diag_vert(-1, ligne)
+            Ligne.win_diag(-1, ligne, player)
 
-# diagonales et verticale
+        Ligne.display_board()
 
-    def win_diag_vert(calc, ligne):
+# diagonales
+
+    def win_diag(calc, ligne, player):
         for i in range(len(ligne1.ligne)-4):
-            if Ligne.list_inst_ligne[i].ligne[ligne] in ["1","2"] and Ligne.list_inst_ligne[i].ligne[ligne] == Ligne.list_inst_ligne[i+1].ligne[ligne+calc] == Ligne.list_inst_ligne[i+2].ligne[ligne+calc*2] == Ligne.list_inst_ligne[i+3].ligne[ligne+calc*3]:
+            temp = [Ligne.list_inst_ligne[i+x].ligne[ligne+calc*x] for x in range(4)]
+            if temp == ['1']*4 or temp == ['2']*4:
                 Ligne.surbrillance_win(calc, i, ligne)
-                Ligne.win()
+                Ligne.win(player)
                 break
 
 # horizontale
 
-    def horrizontal_win():
+    def horrizontal_win(player):
 
         for ligne in Ligne.list_inst_ligne :
             for i in range(len(ligne.ligne)-3):
-                if ligne.ligne[i] in ["1","2"] and ligne.ligne[i] == ligne.ligne[i+1] == ligne.ligne[i+2] == ligne.ligne[i+3]:
+                if ligne.ligne[i:i+4] == ["1"]*4 or ligne.ligne[i:i+4] == ["2"]*4:
                     for itération in range(4) :
                         ligne.ligne[i] = color3+ligne.ligne[i]+reset
                         i +=1
-                    Ligne.win()
+                    Ligne.win(player)
                     break
 
 # mettre en surbrillance la ligne de 4
@@ -128,10 +161,12 @@ class Ligne():
 
 # si victoire
 
-    def win():
+    def win(player):
         global running
-        Ligne.display_board()
-        print("\n"+color3+"WIN"+reset+"\n")
+        if player == "player":
+            print("\n"+color3+"     WIN"+reset+"\n")
+        else :
+            print("\n"+color2+"    LOOSE"+reset+"\n")
         running = False
 
 # instansiation des lignes
@@ -145,15 +180,11 @@ ligne1 = Ligne(1)
 
 running = True
 
-turn = ""
-
 # game loop
-
+Ligne.display_board()
 while running :
-
-    if turn == "1":
-        turn = "2"
-    else :
-        turn = "1"
-
-    Ligne.action()
+    if running == True :
+        Ligne.action()
+        if running == True :
+            time.sleep(0.5)
+            Ligne.ia_move()

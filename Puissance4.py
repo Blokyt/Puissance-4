@@ -21,24 +21,30 @@ class Ligne():
         self.name = name
         self.ligne = ["0","0","0","0","0","0","0"]
         self.list_inst_ligne.append(self)
+        self.lastmove = False
 
 # afficher le tableau
 
-    def display_board():
+    def display_board(colonne):
+
+        print("\n"*10)
 
         numéro_colonne = "|".join([f"{color4 + str(i) + reset}" for i in range(1, 8)])
 
         x = 1
-
         print(numéro_colonne)
 
         for inst in Ligne.list_inst_ligne:
             ligne = Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-x].ligne.copy()
             while "1" in ligne :
-                ligne[ligne.index("1")] = color1+"1"+reset
+                    ligne[ligne.index("1")] = color1+"1"+reset
             while "2" in ligne :
                 ligne[ligne.index("2")] = color2+"2"+reset
+
+
+
             tableau = "|".join(ligne)
+
             print(tableau)
             x += 1
 
@@ -48,46 +54,61 @@ class Ligne():
 
     def ia_move():
 
-        # blocage
+        for win_loose in ["1","2"] :
 
-        for ligne in Ligne.list_inst_ligne :
-            for i in range(len(ligne.ligne)-3):
-                if ligne.ligne[i:i+3] == ["1"]*3 and ligne.ligne[i+3] == "0" :
-                    print("debug bloque")
-                    Ligne.choose_ligne_token(i+4, "2")
-                    Ligne.verification_win("ia")
-                    return
+            for ligne in Ligne.list_inst_ligne :
+                for i in range(len(ligne.ligne)-3):
+                    if ligne.ligne[i:i+3] == [win_loose]*3 and ligne.ligne[i+3] == "0" :
+                        Ligne.choose_ligne_token(i+4, "2")
+                        return
 
-        # winnage
+            for ligne in range(len(ligne1.ligne)) :
+                for i in range(len(ligne1.ligne)-4):
+                    temp = [Ligne.list_inst_ligne[i+x].ligne[ligne] for x in range(3)]
+                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne] =="0" :
+                        Ligne.choose_ligne_token(ligne+1, "2")
+                        return
 
-        for ligne in Ligne.list_inst_ligne :
-            for i in range(len(ligne.ligne)-3):
-                if ligne.ligne[i:i+3] == ["2"]*3 and ligne.ligne[i+3] == "0" :
-                    print("debug win")
-                    Ligne.choose_ligne_token(i+4, "2")
-                    Ligne.verification_win("ia")
-                    return
+            for ligne in range(len(ligne1.ligne)-3) :
+                for i in range(len(ligne1.ligne)-4):
+                    temp = [Ligne.list_inst_ligne[i+x].ligne[ligne+1*x] for x in range(3)]
+                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne+1*3] == "0":
+                        Ligne.choose_ligne_token(ligne+4, "2")
+                        return
+
+            for ligne in range(3, len(ligne1.ligne)) :
+                for i in range(len(ligne1.ligne)-4):
+                    temp = [Ligne.list_inst_ligne[i+x].ligne[ligne-1*x] for x in range(3)]
+                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne-1*3] == "0":
+                        Ligne.choose_ligne_token(ligne-2, "2")
+                        return
+
 
         # si on ne peut pas bloquer une win ou win jouer aléatoirement
 
-        choix = randint(1,7)
+        choix = randint(2,6)
         while Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-1].ligne[int(choix)-1] in ["1", "2"] :
-            print("debug choix")
             choix = randint(1,7)
         else :
             Ligne.choose_ligne_token(choix, "2")
-            Ligne.verification_win("ia")
 
     def action():
         global turn
         global running
         choix = input("\n > ")
         if choix.isdigit():
+            colonne = int(choix)
+            if colonne > 7 :
+                colonne = 7
+            elif colonne < 1 :
+                colonne = 1
             for ligne in Ligne.list_inst_ligne :
-                if Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-1].ligne[int(choix)-1] in ["1", "2"] :
-                    Ligne.action()
-            Ligne.choose_ligne_token(int(choix), "1")
-            Ligne.verification_win("player")
+                if Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-1].ligne[colonne-1] in ["1", "2"] :
+                    return
+            Ligne.choose_ligne_token(colonne, "1")
+            if running == True :
+                time.sleep(uniform(0.3, 1.5))
+                Ligne.ia_move()
         elif choix == "stop":
             running = False
             return
@@ -98,22 +119,17 @@ class Ligne():
 
     def choose_ligne_token(colonne, player):
 
-        if colonne > 7 :
-            colonne = 7
-        elif colonne < 1 :
-            colonne = 1
-
         for ligne in Ligne.list_inst_ligne :
-
-            if ligne.ligne[colonne-1] == "1" or ligne.ligne[colonne-1] == "2" :
+            if ligne.ligne[colonne-1] == "1" or ligne.ligne[colonne-1] == "2" or ligne.ligne[colonne-1] == color4+player+reset  :
                 pass
             else :
                 ligne.ligne[colonne-1] = player
                 break
+        Ligne.verification_win(ligne.ligne[colonne-1], player)
 
 # verification win
 
-    def verification_win(player):
+    def verification_win(colonne, player):
 
         Ligne.horrizontal_win(player)
 
@@ -126,7 +142,7 @@ class Ligne():
         for ligne in range(3, len(ligne1.ligne)) :
             Ligne.win_diag(-1, ligne, player)
 
-        Ligne.display_board()
+        Ligne.display_board(colonne)
 
 # diagonales
 
@@ -163,7 +179,7 @@ class Ligne():
 
     def win(player):
         global running
-        if player == "player":
+        if player == "1":
             print("\n"+color3+"     WIN"+reset+"\n")
         else :
             print("\n"+color2+"    LOOSE"+reset+"\n")
@@ -181,10 +197,6 @@ ligne1 = Ligne(1)
 running = True
 
 # game loop
-Ligne.display_board()
+Ligne.display_board(0)
 while running :
-    if running == True :
-        Ligne.action()
-        if running == True :
-            time.sleep(0.5)
-            Ligne.ia_move()
+    Ligne.action()

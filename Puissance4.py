@@ -25,7 +25,7 @@ class Ligne():
 
 # afficher le tableau
 
-    def display_board(colonne):
+    def display_board():
 
         print("\n"*10)
 
@@ -92,7 +92,7 @@ class Ligne():
         else :
             Ligne.choose_ligne_token(choix, "2")
 
-    def action():
+    def action(joueur):
         global turn
         global running
         choix = input("\n > ")
@@ -105,15 +105,15 @@ class Ligne():
             for ligne in Ligne.list_inst_ligne :
                 if Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-1].ligne[colonne-1] in ["1", "2"] :
                     return
-            Ligne.choose_ligne_token(colonne, "1")
-            if running == True :
+            Ligne.choose_ligne_token(colonne, joueur)
+            if running == True and game_mode == "2" :
                 time.sleep(uniform(0.3, 1.5))
                 Ligne.ia_move()
         elif choix == "stop":
             running = False
             return
         else :
-            Ligne.action()
+            pass
 
 # deposer jeton
 
@@ -142,7 +142,9 @@ class Ligne():
         for ligne in range(3, len(ligne1.ligne)) :
             Ligne.win_diag(-1, ligne, player)
 
-        Ligne.display_board(colonne)
+        if running == True :
+
+            Ligne.display_board()
 
 # diagonales
 
@@ -178,11 +180,12 @@ class Ligne():
 # si victoire
 
     def win(player):
+        Ligne.display_board()
         global running
         if player == "1":
-            print("\n"+color3+"     WIN"+reset+"\n")
+            print("\n"+color1+"BLUE"+reset+color3+" WIN"+reset+"\n")
         else :
-            print("\n"+color2+"    LOOSE"+reset+"\n")
+            print("\n"+color2+"RED"+reset+color3+" WIN"+reset+"\n")
         running = False
 
 # instansiation des lignes
@@ -197,6 +200,19 @@ ligne1 = Ligne(1)
 running = True
 
 # game loop
-Ligne.display_board(0)
+
+print("\n"+color1+" 1"+reset+" : Local\n"+color1+" 2"+reset+" : Contre l'IA")
+game_mode = input("\n > ")
+if not game_mode == "1" and not game_mode == "2" :
+    running = False
+else :
+    Ligne.display_board()
+
+
 while running :
-    Ligne.action()
+    if game_mode == "1" and running :
+        Ligne.action("1")
+        if running :
+            Ligne.action("2")
+    elif game_mode == "2" and running :
+        Ligne.action("1")

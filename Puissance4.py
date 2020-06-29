@@ -21,6 +21,10 @@ class Ligne():
         self.ligne = ["0","0","0","0","0","0","0"]
         self.list_inst_ligne.append(self)
 
+    def initialize_board():
+        for ligne in Ligne.list_inst_ligne:
+            ligne.ligne = ["0","0","0","0","0","0","0"]
+
 # afficher le tableau
 
     def display_board():
@@ -60,14 +64,14 @@ class Ligne():
                 for i in range(len(ligne.ligne)-3):
                     if ligne.ligne[i:i+3] == [win_loose]*3 and ligne.ligne[i+3] == "0" :
                         Ligne.choose_ligne_token(i+4, "2")
-                        return print("horizontale devant")
+                        return print("\ndebug : horizontale devant")
 
             #horizontale derrière
 
                 for i in range(1, len(ligne.ligne)-2):
                     if ligne.ligne[i:i+3] == [win_loose]*3 and ligne.ligne[i-1] == "0" :
                         Ligne.choose_ligne_token(i, "2")
-                        return print("horizontale derrière")
+                        return print("\ndebug : horizontale derrière")
 
             # verticale
 
@@ -76,7 +80,7 @@ class Ligne():
                     temp = [Ligne.list_inst_ligne[i+x].ligne[ligne] for x in range(3)]
                     if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne] =="0" :
                         Ligne.choose_ligne_token(ligne+1, "2")
-                        return print("vertical")
+                        return print("\ndebug : vertical")
 
             #diagonales
 
@@ -89,14 +93,14 @@ class Ligne():
                         if num == 0 :
                             if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne+3] == "0":
                                 Ligne.choose_ligne_token(ligne+4, "2")
-                                return print("droite haut")
+                                return print("\ndebug : droite haut")
 
             # droite bas
 
                         else :
                             if temp == [win_loose]*3 and Ligne.list_inst_ligne[i-1].ligne[ligne-1] == "0":
                                 Ligne.choose_ligne_token(ligne, "2")
-                                return print("droite bas")
+                                return print("\ndebug : droite bas")
 
             # gauche haut
 
@@ -106,14 +110,14 @@ class Ligne():
                         if num == 0 :
                             if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne-3] == "0":
                                 Ligne.choose_ligne_token(ligne-2, "2")
-                                return print("gauche haut")
+                                return print("\ndebug : gauche haut")
 
             # gauche bas
 
                         else :
                             if temp == [win_loose]*3 and Ligne.list_inst_ligne[i-1].ligne[ligne+1] == "0":
                                 Ligne.choose_ligne_token(ligne+2, "2")
-                                return print("gauche bas")
+                                return print("\ndebug : gauche bas")
 
 
         # si on ne peut pas bloquer une win ou win jouer "aléatoirement"
@@ -134,7 +138,7 @@ class Ligne():
             choix = randint(1,7)
         else :
             Ligne.choose_ligne_token(choix, "2")
-            return print("random")
+            return print("\ndebug : random")
 
     def action(joueur):
         global turn
@@ -157,7 +161,6 @@ class Ligne():
                 Ligne.ia_move()
         elif choix == "back":
             running = False
-            display_menu()
 
         else :
             Ligne.action(joueur)
@@ -233,7 +236,6 @@ class Ligne():
         else :
             print("\n"+color2+"RED"+reset+color3+" WIN"+reset+"\n")
         running = False
-        display_menu()
 
 # instansiation des lignes
 
@@ -260,6 +262,7 @@ def menu():
     game_mode = input("\n > ")
     if game_mode == "1" or game_mode == "2" :
         running = True
+        Ligne.initialize_board()
         Ligne.display_board()
     elif game_mode == "3"  :
         running = False
@@ -271,7 +274,13 @@ display_menu()
 while running :
     if game_mode == "1" and running :
         Ligne.action("1")
-        if running :
+        if not running :
+            display_menu()
+        else :
             Ligne.action("2")
+            if not running :
+                display_menu()
     elif game_mode == "2" and running :
         Ligne.action("1")
+        if not running :
+            display_menu()

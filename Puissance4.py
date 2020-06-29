@@ -30,7 +30,7 @@ class Ligne():
 
         x = 1
         print(" "+numéro_colonne)
-        print(" "+(color1+"▿"+reset+" ")*len(ligne1.ligne))
+        print(" "+(color1+"▾"+reset+" ")*len(ligne1.ligne))
 
         for element in Ligne.list_inst_ligne:
             ligne = Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-x].ligne.copy()
@@ -43,7 +43,7 @@ class Ligne():
 
             print(" "+tableau)
             x += 1
-        print(" "+(color1+"▵"+reset+" ")*len(ligne1.ligne))
+        print(" "+(color1+"▴"+reset+" ")*len(ligne1.ligne))
         print(" "+numéro_colonne)
 
 #chosir ligne

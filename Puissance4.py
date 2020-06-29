@@ -21,7 +21,6 @@ class Ligne():
         self.name = name
         self.ligne = ["0","0","0","0","0","0","0"]
         self.list_inst_ligne.append(self)
-        self.lastmove = False
 
 # afficher le tableau
 
@@ -56,15 +55,22 @@ class Ligne():
 
         # verifie si l'ia peut empecher l'adversaire de gagner ou de gagner elle meme
 
-        for win_loose in ["1","2"] :
+        for win_loose in ["2","1"] :
 
-            #horizontale
+            #horizontale devant
 
             for ligne in Ligne.list_inst_ligne :
                 for i in range(len(ligne.ligne)-3):
                     if ligne.ligne[i:i+3] == [win_loose]*3 and ligne.ligne[i+3] == "0" :
                         Ligne.choose_ligne_token(i+4, "2")
-                        return
+                        return print("horizontale devant")
+
+            #horizontale derrière
+
+                for i in range(1, len(ligne.ligne)-2):
+                    if ligne.ligne[i:i+3] == [win_loose]*3 and ligne.ligne[i-1] == "0" :
+                        Ligne.choose_ligne_token(i, "2")
+                        return print("horizontale derrière")
 
             # verticale
 
@@ -73,29 +79,51 @@ class Ligne():
                     temp = [Ligne.list_inst_ligne[i+x].ligne[ligne] for x in range(3)]
                     if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne] =="0" :
                         Ligne.choose_ligne_token(ligne+1, "2")
-                        return
+                        return print("vertical")
 
             #diagonales
+
+            # droite haut
 
             for ligne in range(len(ligne1.ligne)-3) :
                 for i in range(len(ligne1.ligne)-4):
                     temp = [Ligne.list_inst_ligne[i+x].ligne[ligne+1*x] for x in range(3)]
-                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne+1*3] == "0":
+                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne+3] == "0":
                         Ligne.choose_ligne_token(ligne+4, "2")
-                        return
+                        return print("droite haut")
 
-            for ligne in range(3, len(ligne1.ligne)) :
+            # droite bas
+
+            for ligne in range(1, len(ligne1.ligne)-3) :
+                for i in range(1, len(ligne1.ligne)-4):
+                    temp = [Ligne.list_inst_ligne[i+x].ligne[ligne+1*x] for x in range(3)]
+                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i-1].ligne[ligne-1] == "0":
+                        Ligne.choose_ligne_token(ligne, "2")
+                        return print("droite bas")
+
+            # gauche haut
+
+            for ligne in range(3,len(ligne1.ligne)) :
                 for i in range(len(ligne1.ligne)-4):
                     temp = [Ligne.list_inst_ligne[i+x].ligne[ligne-1*x] for x in range(3)]
-                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne-1*3] == "0":
+                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne-3] == "0":
                         Ligne.choose_ligne_token(ligne-2, "2")
-                        return
+                        return print("gauche haut")
+
+            # gauche bas
+
+            for ligne in range(3,len(ligne1.ligne)-1) :
+                for i in range(1,len(ligne1.ligne)-4):
+                    temp = [Ligne.list_inst_ligne[i+x].ligne[ligne-1*x] for x in range(3)]
+                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i-1].ligne[ligne+1] == "0":
+                        Ligne.choose_ligne_token(ligne+2, "2")
+                        return print("gauche bas")
 
         # si on ne peut pas bloquer une win ou win jouer "aléatoirement"
 
         choix = None
 
-        con = randint(0,3)
+        con = randint(0,6)
         if not con :
             choix = randint(3,5)
         else :
@@ -109,12 +137,15 @@ class Ligne():
             choix = randint(1,7)
         else :
             Ligne.choose_ligne_token(choix, "2")
+            return print("random")
 
     def action(joueur):
         global turn
         global running
         choix = input("\n > ")
-        if choix.isdigit():
+        if choix == "ia" :
+            Ligne.ia_move()
+        elif choix.isdigit():
             colonne = int(choix)
             if colonne > 7 :
                 colonne = 7
@@ -131,14 +162,14 @@ class Ligne():
             running = False
             return
         else :
-            pass
+            Ligne.action(joueur)
 
 # deposer jeton
 
     def choose_ligne_token(colonne, player):
 
         for ligne in Ligne.list_inst_ligne :
-            if ligne.ligne[colonne-1] == "1" or ligne.ligne[colonne-1] == "2" or ligne.ligne[colonne-1] == color4+player+reset  :
+            if ligne.ligne[colonne-1] == "1" or ligne.ligne[colonne-1] == "2" :
                 pass
             else :
                 ligne.ligne[colonne-1] = player

@@ -17,15 +17,13 @@ class Ligne():
 
     list_inst_ligne = []
 
-    def __init__(self, name):
-        self.name = name
+    def __init__(self):
         self.ligne = ["0","0","0","0","0","0","0"]
         self.list_inst_ligne.append(self)
 
 # afficher le tableau
 
     def display_board():
-
         print("\n"*10)
 
         numéro_colonne = "|".join([f"{color4 + str(i) + reset}" for i in range(1, 8)])
@@ -33,14 +31,12 @@ class Ligne():
         x = 1
         print(numéro_colonne)
 
-        for inst in Ligne.list_inst_ligne:
+        for element in Ligne.list_inst_ligne:
             ligne = Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-x].ligne.copy()
             while "1" in ligne :
                     ligne[ligne.index("1")] = color1+"1"+reset
             while "2" in ligne :
                 ligne[ligne.index("2")] = color2+"2"+reset
-
-
 
             tableau = "|".join(ligne)
 
@@ -85,39 +81,39 @@ class Ligne():
 
             # droite haut
 
-            for ligne in range(len(ligne1.ligne)-3) :
-                for i in range(len(ligne1.ligne)-4):
-                    temp = [Ligne.list_inst_ligne[i+x].ligne[ligne+1*x] for x in range(3)]
-                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne+3] == "0":
-                        Ligne.choose_ligne_token(ligne+4, "2")
-                        return print("droite haut")
+            for num in [0, 1]:
+                for ligne in range(num, len(ligne1.ligne)-3) :
+                    for i in range(num, len(ligne1.ligne)-4):
+                        temp = [Ligne.list_inst_ligne[i+x].ligne[ligne+1*x] for x in range(3)]
+                        if num == 0 :
+                            if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne+3] == "0":
+                                Ligne.choose_ligne_token(ligne+4, "2")
+                                return print("droite haut")
 
             # droite bas
 
-            for ligne in range(1, len(ligne1.ligne)-3) :
-                for i in range(1, len(ligne1.ligne)-4):
-                    temp = [Ligne.list_inst_ligne[i+x].ligne[ligne+1*x] for x in range(3)]
-                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i-1].ligne[ligne-1] == "0":
-                        Ligne.choose_ligne_token(ligne, "2")
-                        return print("droite bas")
+                        else :
+                            if temp == [win_loose]*3 and Ligne.list_inst_ligne[i-1].ligne[ligne-1] == "0":
+                                Ligne.choose_ligne_token(ligne, "2")
+                                return print("droite bas")
 
             # gauche haut
 
-            for ligne in range(3,len(ligne1.ligne)) :
-                for i in range(len(ligne1.ligne)-4):
-                    temp = [Ligne.list_inst_ligne[i+x].ligne[ligne-1*x] for x in range(3)]
-                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne-3] == "0":
-                        Ligne.choose_ligne_token(ligne-2, "2")
-                        return print("gauche haut")
+                for ligne in range(3,len(ligne1.ligne)-num) :
+                    for i in range(num, len(ligne1.ligne)-4):
+                        temp = [Ligne.list_inst_ligne[i+x].ligne[ligne-1*x] for x in range(3)]
+                        if num == 0 :
+                            if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne-3] == "0":
+                                Ligne.choose_ligne_token(ligne-2, "2")
+                                return print("gauche haut")
 
             # gauche bas
 
-            for ligne in range(3,len(ligne1.ligne)-1) :
-                for i in range(1,len(ligne1.ligne)-4):
-                    temp = [Ligne.list_inst_ligne[i+x].ligne[ligne-1*x] for x in range(3)]
-                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i-1].ligne[ligne+1] == "0":
-                        Ligne.choose_ligne_token(ligne+2, "2")
-                        return print("gauche bas")
+                        else :
+                            if temp == [win_loose]*3 and Ligne.list_inst_ligne[i-1].ligne[ligne+1] == "0":
+                                Ligne.choose_ligne_token(ligne+2, "2")
+                                return print("gauche bas")
+
 
         # si on ne peut pas bloquer une win ou win jouer "aléatoirement"
 
@@ -167,7 +163,6 @@ class Ligne():
 # deposer jeton
 
     def choose_ligne_token(colonne, player):
-
         for ligne in Ligne.list_inst_ligne :
             if ligne.ligne[colonne-1] == "1" or ligne.ligne[colonne-1] == "2" :
                 pass
@@ -175,6 +170,8 @@ class Ligne():
                 ligne.ligne[colonne-1] = player
                 break
         Ligne.verification_win(ligne.ligne[colonne-1], player)
+        if running == True :
+            Ligne.display_board()
 
 # verification win
 
@@ -191,9 +188,7 @@ class Ligne():
         for ligne in range(3, len(ligne1.ligne)) :
             Ligne.win_diag(-1, ligne, player)
 
-        if running == True :
 
-            Ligne.display_board()
 
 # diagonales
 
@@ -239,12 +234,12 @@ class Ligne():
 
 # instansiation des lignes
 
-ligne6 = Ligne(6)
-ligne5 = Ligne(5)
-ligne4 = Ligne(4)
-ligne3 = Ligne(3)
-ligne2 = Ligne(2)
-ligne1 = Ligne(1)
+ligne6 = Ligne()
+ligne5 = Ligne()
+ligne4 = Ligne()
+ligne3 = Ligne()
+ligne2 = Ligne()
+ligne1 = Ligne()
 
 running = True
 

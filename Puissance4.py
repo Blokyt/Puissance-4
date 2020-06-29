@@ -155,9 +155,10 @@ class Ligne():
             if running == True and game_mode == "2" :
                 time.sleep(uniform(0.3, 1.5))
                 Ligne.ia_move()
-        elif choix == "stop":
+        elif choix == "back":
             running = False
-            return
+            display_menu()
+
         else :
             Ligne.action(joueur)
 
@@ -232,6 +233,7 @@ class Ligne():
         else :
             print("\n"+color2+"RED"+reset+color3+" WIN"+reset+"\n")
         running = False
+        display_menu()
 
 # instansiation des lignes
 
@@ -246,13 +248,25 @@ running = True
 
 # game loop
 
-print("\n"+color1+" 1"+reset+" : Local\n"+color1+" 2"+reset+" : Contre l'IA")
-game_mode = input("\n > ")
-if not game_mode == "1" and not game_mode == "2" :
-    running = False
-else :
-    Ligne.display_board()
+game_mode = "1"
 
+def display_menu():
+    print("\n"*5)
+    print("\n"+color1+" 1"+reset+" : Local\n"+color1+" 2"+reset+" : Contre l'IA\n"+color1+" 3"+reset+" : Exit")
+    menu()
+
+def menu():
+    global game_mode, running
+    game_mode = input("\n > ")
+    if game_mode == "1" or game_mode == "2" :
+        running = True
+        Ligne.display_board()
+    elif game_mode == "3"  :
+        running = False
+    else :
+        menu()
+
+display_menu()
 
 while running :
     if game_mode == "1" and running :

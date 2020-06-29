@@ -141,9 +141,9 @@ class Ligne():
             return print("\ndebug : random")
 
     def action(joueur):
-        global turn
-        global running
+        global running, turnpass
         choix = input("\n > ")
+        print(joueur)
         if choix == "ia" :
             Ligne.ia_move()
         elif choix.isdigit():
@@ -155,6 +155,7 @@ class Ligne():
             for ligne in Ligne.list_inst_ligne :
                 if Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-1].ligne[colonne-1] in ["1", "2"] :
                     return
+            turnpass = True
             Ligne.choose_ligne_token(colonne, joueur)
             if running == True and game_mode == "2" :
                 time.sleep(uniform(0.3, 1.5))
@@ -249,8 +250,10 @@ ligne1 = Ligne()
 running = True
 
 # game loop
-
+player1 = "1"
+player2 = "2"
 game_mode = "1"
+turnpass = False
 
 def display_menu():
     print("\n"*5)
@@ -258,10 +261,13 @@ def display_menu():
     menu()
 
 def menu():
-    global game_mode, running
+    global game_mode, running, turnpass, player1, player2
     game_mode = input("\n > ")
     if game_mode == "1" or game_mode == "2" :
+        turnpass = False
         running = True
+        player1 = "1"
+        player2 = "2"
         Ligne.initialize_board()
         Ligne.display_board()
     elif game_mode == "3"  :
@@ -273,13 +279,14 @@ display_menu()
 
 while running :
     if game_mode == "1" and running :
-        Ligne.action("1")
+        turnpass = False
+        Ligne.action(player1)
         if not running :
             display_menu()
         else :
-            Ligne.action("2")
-            if not running :
-                display_menu()
+            if turnpass :
+                player1, player2  = player2, player1
+
     elif game_mode == "2" and running :
         Ligne.action("1")
         if not running :

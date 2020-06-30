@@ -203,7 +203,7 @@ class Ligne():
             else :
                 ligne.ligne[colonne-1] = player
                 break
-        Ligne.verification_win(ligne.ligne[colonne-1], player)
+        Ligne.verification_win(colonne, player)
         if running == True :
             Ligne.display_board(colonne, player)
 
@@ -211,32 +211,32 @@ class Ligne():
 
     def verification_win(colonne, player):
 
-        Ligne.horrizontal_win(player)
+        Ligne.horrizontal_win(player, colonne)
 
         for ligne in range(len(ligne1.ligne)) :
-            Ligne.win_diag(0, ligne, player)
+            Ligne.win_diag(0, ligne, player, colonne)
 
         for ligne in range(len(ligne1.ligne)-3) :
-            Ligne.win_diag(1, ligne, player)
+            Ligne.win_diag(1, ligne, player, colonne)
 
         for ligne in range(3, len(ligne1.ligne)) :
-            Ligne.win_diag(-1, ligne, player)
+            Ligne.win_diag(-1, ligne, player, colonne)
 
 
 
 # diagonales
 
-    def win_diag(calc, ligne, player):
+    def win_diag(calc, ligne, player, colonne):
         for i in range(len(ligne1.ligne)-4):
             temp = [Ligne.list_inst_ligne[i+x].ligne[ligne+calc*x] for x in range(4)]
             if temp == ['1']*4 or temp == ['2']*4:
                 Ligne.surbrillance_win(calc, i, ligne)
-                Ligne.win(player)
+                Ligne.win(player, colonne)
                 break
 
 # horizontale
 
-    def horrizontal_win(player):
+    def horrizontal_win(player, colonne):
 
         for ligne in Ligne.list_inst_ligne :
             for i in range(len(ligne.ligne)-3):
@@ -244,7 +244,7 @@ class Ligne():
                     for itération in range(4) :
                         ligne.ligne[i] = color3+ligne.ligne[i]+reset
                         i +=1
-                    Ligne.win(player)
+                    Ligne.win(player, colonne)
                     break
 
 # mettre en surbrillance la ligne de 4
@@ -257,14 +257,15 @@ class Ligne():
 
 # si victoire
 
-    def win(player):
-        Ligne.display_board()
+    def win(player, colonne):
+        Ligne.display_board(colonne, player)
         global running
         if player == "1":
             print("\n"+color1+"BLUE"+reset+color3+" WIN"+reset+"\n")
         else :
             print("\n"+color2+"RED"+reset+color3+" WIN"+reset+"\n")
         running = False
+        input("\n > ")
 
 # instansiation des lignes
 

@@ -9,6 +9,8 @@ color1 = fg('cyan')
 color2 = fg('red')
 color3 = fg('green')
 color4 = fg(172)
+color5 = fg(162)
+color6 = fg(17)
 reset = attr('reset')
 
 # logique
@@ -27,14 +29,25 @@ class Ligne():
 
 # afficher le tableau
 
-    def display_board():
-        print("\n"*10)
+    def display_board(colonne, player, color=fg(0)):
 
-        numéro_colonne = "|".join([f"{color4 + str(i) + reset}" for i in range(1, 8)])
+        if player == "2":
+            color = color5
+        elif player == "1":
+            color = color1
+
+
+
+        print("\n"*10)
+        numéro_colonne = " "+"|".join([f"{color4 + str(i) + reset}" for i in range(1, 8)])
+
+        triangle_list = ["▾","▾","▾","▾","▾","▾","▾"]
+        triangle_list[colonne-1] = color+triangle_list[colonne-1]+reset
+        triangle = " "+" ".join(triangle_list)
 
         x = 1
-        print(" "+numéro_colonne)
-        print(" "+(color1+"▾"+reset+" ")*len(ligne1.ligne))
+        print(numéro_colonne)
+        print(triangle)
 
         for element in Ligne.list_inst_ligne:
             ligne = Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-x].ligne.copy()
@@ -47,8 +60,14 @@ class Ligne():
 
             print(" "+tableau)
             x += 1
-        print(" "+(color1+"▴"+reset+" ")*len(ligne1.ligne))
-        print(" "+numéro_colonne)
+
+        triangle_list = ["▴","▴","▴","▴","▴","▴","▴"]
+        triangle_list[colonne-1] = color+triangle_list[colonne-1]+reset
+        triangle = " "+" ".join(triangle_list)
+
+
+        print(triangle)
+        print(numéro_colonne)
 
 #chosir ligne
 
@@ -65,6 +84,15 @@ class Ligne():
                     if ligne.ligne[i:i+3] == [win_loose]*3 and ligne.ligne[i+3] == "0" :
                         Ligne.choose_ligne_token(i+4, "2")
                         return print("\ndebug : horizontale devant")
+
+                    if ligne.ligne[i:i+3] == [win_loose]*2+["0"] and ligne.ligne[i+3] == win_loose :
+                        Ligne.choose_ligne_token(i+3, "2")
+                        return print("\ndebug : horizontale milieu +")
+
+                    if ligne.ligne[i:i+3] == [win_loose]+["0"]+[win_loose] and ligne.ligne[i+3] == win_loose :
+                        Ligne.choose_ligne_token(i+2, "2")
+                        return print("\ndebug : horizontale milieu -")
+
 
             #horizontale derrière
 
@@ -177,7 +205,7 @@ class Ligne():
                 break
         Ligne.verification_win(ligne.ligne[colonne-1], player)
         if running == True :
-            Ligne.display_board()
+            Ligne.display_board(colonne, player)
 
 # verification win
 
@@ -269,7 +297,7 @@ def menu():
         player1 = "1"
         player2 = "2"
         Ligne.initialize_board()
-        Ligne.display_board()
+        Ligne.display_board(4, None)
     elif game_mode == "3"  :
         running = False
     else :

@@ -71,7 +71,7 @@ class Ligne():
 
 #chosir ligne
 
-    def ia_move():
+    def ia_move(ia):
 
         # verifie si l'ia peut empecher l'adversaire de gagner ou de gagner elle meme
 
@@ -82,15 +82,15 @@ class Ligne():
             for ligne in Ligne.list_inst_ligne :
                 for i in range(len(ligne.ligne)-3):
                     if ligne.ligne[i:i+3] == [win_loose]*3 and ligne.ligne[i+3] == "0" :
-                        Ligne.choose_ligne_token(i+4, "2")
+                        Ligne.choose_ligne_token(i+4, ia)
                         return print("\ndebug : horizontale devant")
 
                     if ligne.ligne[i:i+3] == [win_loose]*2+["0"] and ligne.ligne[i+3] == win_loose :
-                        Ligne.choose_ligne_token(i+3, "2")
+                        Ligne.choose_ligne_token(i+3, ia)
                         return print("\ndebug : horizontale milieu +")
 
                     if ligne.ligne[i:i+3] == [win_loose]+["0"]+[win_loose] and ligne.ligne[i+3] == win_loose :
-                        Ligne.choose_ligne_token(i+2, "2")
+                        Ligne.choose_ligne_token(i+2, ia)
                         return print("\ndebug : horizontale milieu -")
 
 
@@ -98,7 +98,7 @@ class Ligne():
 
                 for i in range(1, len(ligne.ligne)-2):
                     if ligne.ligne[i:i+3] == [win_loose]*3 and ligne.ligne[i-1] == "0" :
-                        Ligne.choose_ligne_token(i, "2")
+                        Ligne.choose_ligne_token(i, ia)
                         return print("\ndebug : horizontale derrière")
 
             # verticale
@@ -107,7 +107,7 @@ class Ligne():
                 for i in range(len(ligne1.ligne)-4):
                     temp = [Ligne.list_inst_ligne[i+x].ligne[ligne] for x in range(3)]
                     if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne] =="0" :
-                        Ligne.choose_ligne_token(ligne+1, "2")
+                        Ligne.choose_ligne_token(ligne+1, ia)
                         return print("\ndebug : vertical")
 
             #diagonales
@@ -120,14 +120,14 @@ class Ligne():
                         temp = [Ligne.list_inst_ligne[i+x].ligne[ligne+1*x] for x in range(3)]
                         if num == 0 :
                             if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne+3] == "0":
-                                Ligne.choose_ligne_token(ligne+4, "2")
+                                Ligne.choose_ligne_token(ligne+4, ia)
                                 return print("\ndebug : droite haut")
 
             # droite bas
 
                         else :
                             if temp == [win_loose]*3 and Ligne.list_inst_ligne[i-1].ligne[ligne-1] == "0":
-                                Ligne.choose_ligne_token(ligne, "2")
+                                Ligne.choose_ligne_token(ligne, ia)
                                 return print("\ndebug : droite bas")
 
             # gauche haut
@@ -137,14 +137,14 @@ class Ligne():
                         temp = [Ligne.list_inst_ligne[i+x].ligne[ligne-1*x] for x in range(3)]
                         if num == 0 :
                             if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne-3] == "0":
-                                Ligne.choose_ligne_token(ligne-2, "2")
+                                Ligne.choose_ligne_token(ligne-2, ia)
                                 return print("\ndebug : gauche haut")
 
             # gauche bas
 
                         else :
                             if temp == [win_loose]*3 and Ligne.list_inst_ligne[i-1].ligne[ligne+1] == "0":
-                                Ligne.choose_ligne_token(ligne+2, "2")
+                                Ligne.choose_ligne_token(ligne+2, ia)
                                 return print("\ndebug : gauche bas")
 
 
@@ -165,7 +165,7 @@ class Ligne():
         while Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-1].ligne[choix-1] in ["1", "2"] :
             choix = randint(1,7)
         else :
-            Ligne.choose_ligne_token(choix, "2")
+            Ligne.choose_ligne_token(choix, ia)
             return print("\ndebug : random")
 
     def action(joueur):
@@ -186,8 +186,8 @@ class Ligne():
             turnpass = True
             Ligne.choose_ligne_token(colonne, joueur)
             if running == True and game_mode == "2" :
-                time.sleep(uniform(0.3, 1.5))
-                Ligne.ia_move()
+                time.sleep(uniform(0.5, 1.5))
+                Ligne.ia_move("2")
         elif choix == "back":
             running = False
 
@@ -283,23 +283,27 @@ player1 = "1"
 player2 = "2"
 game_mode = "1"
 turnpass = False
+ia1 = "1"
+ia2 = "2"
 
 def display_menu():
     print("\n"*5)
-    print("\n"+color1+" 1"+reset+" : Local\n"+color1+" 2"+reset+" : Contre l'IA\n"+color1+" 3"+reset+" : Exit")
+    print("\n"+color1+" 1"+reset+" : Local\n"+color1+" 2"+reset+" : Contre l'IA\n"+color1+" 3"+reset+" : IA VS IA\n"+color1+" 4"+reset+" : Exit")
     menu()
 
 def menu():
-    global game_mode, running, turnpass, player1, player2
+    global game_mode, running, turnpass, player1, player2, ia
     game_mode = input("\n > ")
-    if game_mode == "1" or game_mode == "2" :
+    if game_mode == "1" or game_mode == "2" or game_mode == "3" :
         turnpass = False
         running = True
+        ia1 = "1"
+        ia2 = "2"
         player1 = "1"
         player2 = "2"
         Ligne.initialize_board()
         Ligne.display_board(4, None)
-    elif game_mode == "3"  :
+    elif game_mode == "4"  :
         running = False
     else :
         menu()
@@ -320,3 +324,11 @@ while running :
         Ligne.action("1")
         if not running :
             display_menu()
+
+    elif game_mode == "3" and running :
+        time.sleep(uniform(0.5, 1.5))
+        Ligne.ia_move(ia1)
+        if not running :
+            display_menu()
+        else :
+            ia1, ia2  = ia2, ia1

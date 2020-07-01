@@ -73,40 +73,56 @@ class Ligne():
 
     def ia_move(ia):
 
-        # verifie si l'ia peut empecher l'adversaire de gagner ou de gagner elle meme
+        # verifie si l'ia peut empecher l'adversaire de gagner ou de gagner elle meme ou autre
 
         for win_loose in ["2","1"] :
 
             #horizontale devant
 
             for ligne in Ligne.list_inst_ligne :
-                for i in range(len(ligne.ligne)-3):
-                    if ligne.ligne[i:i+3] == [win_loose]*3 and ligne.ligne[i+3] == "0" :
-                        Ligne.choose_ligne_token(i+4, ia)
-                        return print("\ndebug : horizontale devant")
+                for hauteur in range(len(ligne1.ligne)-1):
+                    for i in range(len(ligne.ligne)-3):
+                        temp = Ligne.list_inst_ligne[hauteur].ligne[i:i+4]
+                        if hauteur >= 1 :
+                            if temp == [win_loose]*3+["0"] and not Ligne.list_inst_ligne[hauteur-1].ligne[i+3] == "0" or temp == [win_loose]+["0"]+[win_loose]*2 and Ligne.list_inst_ligne[hauteur-2].ligne[i+3] == "0" :
+                                Ligne.choose_ligne_token(i+4, ia)
+                                return print("\ndebug : horizontale devant")
 
-                    if ligne.ligne[i:i+3] == [win_loose]*2+["0"] and ligne.ligne[i+3] == win_loose :
-                        Ligne.choose_ligne_token(i+3, ia)
-                        return print("\ndebug : horizontale milieu +")
+                            if temp == ["0"]+[win_loose]*3 and not Ligne.list_inst_ligne[hauteur-1].ligne[i] == "0" or temp == [win_loose]+["0"]+[win_loose]*2 and Ligne.list_inst_ligne[hauteur-2].ligne[i] == "0" :
+                                Ligne.choose_ligne_token(i+1, ia)
+                                return print("\ndebug : horizontale derrière")
 
-                    if ligne.ligne[i:i+3] == [win_loose]+["0"]+[win_loose] and ligne.ligne[i+3] == win_loose :
-                        Ligne.choose_ligne_token(i+2, ia)
-                        return print("\ndebug : horizontale milieu -")
+                            if temp == [win_loose]*2+["0"]+[win_loose] and not Ligne.list_inst_ligne[hauteur-1].ligne[i+2] == "0" or temp == [win_loose]+["0"]+[win_loose]*2 and Ligne.list_inst_ligne[hauteur-2].ligne[i+2] == "0" :
+                                Ligne.choose_ligne_token(i+3, ia)
+                                return print("\ndebug : horizontale milieu + =1")
 
+                            if temp == [win_loose]+["0"]+[win_loose]*2 and not Ligne.list_inst_ligne[hauteur-1].ligne[i+1] == "0" or temp == [win_loose]+["0"]+[win_loose]*2 and Ligne.list_inst_ligne[hauteur-2].ligne[i+1] == "0" :
+                                Ligne.choose_ligne_token(i+2, ia)
+                                return print("\ndebug : horizontale milieu - =1")
 
-            #horizontale derrière
+                        else :
+                            if temp == [win_loose]*3+["0"] :
+                                Ligne.choose_ligne_token(i+4, ia)
+                                return print("\ndebug : horizontale devant")
 
-                for i in range(1, len(ligne.ligne)-2):
-                    if ligne.ligne[i:i+3] == [win_loose]*3 and ligne.ligne[i-1] == "0" :
-                        Ligne.choose_ligne_token(i, ia)
-                        return print("\ndebug : horizontale derrière")
+                            if temp == ["0"]+[win_loose]*3 :
+                                Ligne.choose_ligne_token(i+1, ia)
+                                return print("\ndebug : horizontale derrière")
+
+                            if temp == [win_loose]*2+["0"]+[win_loose]:
+                                Ligne.choose_ligne_token(i+3, ia)
+                                return print("\ndebug : horizontale milieu +")
+
+                            if temp == [win_loose]+["0"]+[win_loose]*2 :
+                                Ligne.choose_ligne_token(i+2, ia)
+                                return print("\ndebug : horizontale milieu -")
 
             # verticale
 
             for ligne in range(len(ligne1.ligne)) :
                 for i in range(len(ligne1.ligne)-4):
-                    temp = [Ligne.list_inst_ligne[i+x].ligne[ligne] for x in range(3)]
-                    if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne] =="0" :
+                    temp = [Ligne.list_inst_ligne[i+x].ligne[ligne] for x in range(4)]
+                    if temp == [win_loose]*3+["0"] :
                         Ligne.choose_ligne_token(ligne+1, ia)
                         return print("\ndebug : vertical")
 
@@ -114,53 +130,51 @@ class Ligne():
 
             # droite haut
 
-            for num in [0, 1]:
-                for ligne in range(num, len(ligne1.ligne)-3) :
-                    for i in range(num, len(ligne1.ligne)-4):
-                        temp = [Ligne.list_inst_ligne[i+x].ligne[ligne+1*x] for x in range(3)]
-                        if num == 0 :
-                            if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne+3] == "0":
-                                Ligne.choose_ligne_token(ligne+4, ia)
-                                return print("\ndebug : droite haut")
+            for ligne in range(len(ligne1.ligne)-3) :
+                for i in range(len(ligne1.ligne)-4):
+                    temp = [Ligne.list_inst_ligne[i+x].ligne[ligne+1*x] for x in range(4)]
+                    if temp == [win_loose]*3+["0"] and Ligne.list_inst_ligne[i+1].ligne[ligne+3] == "0" or temp == [win_loose]*3+["0"] and not Ligne.list_inst_ligne[i+2].ligne[ligne+3] == "0" :
+                        Ligne.choose_ligne_token(ligne+4, ia)
+                        return print("\ndebug : droite haut")
 
-            # droite bas
+                    # droite bas
 
-                        else :
-                            if temp == [win_loose]*3 and Ligne.list_inst_ligne[i-1].ligne[ligne-1] == "0":
-                                Ligne.choose_ligne_token(ligne, ia)
-                                return print("\ndebug : droite bas")
+                    if temp == ["0"]+[win_loose]*3 :
+                        Ligne.choose_ligne_token(ligne+1, ia)
+                        return print("\ndebug : droite bas")
 
             # gauche haut
 
-                for ligne in range(3,len(ligne1.ligne)-num) :
-                    for i in range(num, len(ligne1.ligne)-4):
-                        temp = [Ligne.list_inst_ligne[i+x].ligne[ligne-1*x] for x in range(3)]
-                        if num == 0 :
-                            if temp == [win_loose]*3 and Ligne.list_inst_ligne[i+3].ligne[ligne-3] == "0":
-                                Ligne.choose_ligne_token(ligne-2, ia)
-                                return print("\ndebug : gauche haut")
+            for ligne in range(3,len(ligne1.ligne)) :
+                for i in range(len(ligne1.ligne)-4):
+                    temp = [Ligne.list_inst_ligne[i+x].ligne[ligne-1*x] for x in range(4)]
+                    if temp == [win_loose]*3+["0"] and Ligne.list_inst_ligne[i+1].ligne[ligne-3] == "0" or temp == [win_loose]*3+["0"] and not Ligne.list_inst_ligne[i+2].ligne[ligne-3] == "0" :
+                        Ligne.choose_ligne_token(ligne-2, ia)
+                        return print("\ndebug : gauche haut")
 
-            # gauche bas
+                    # gauche bas
 
+                    if temp == ["0"]+[win_loose]*3 :
+                        Ligne.choose_ligne_token(ligne+1, ia)
+                        return print("\ndebug : gauche bas")
+
+
+
+            for ligne in Ligne.list_inst_ligne :
+                for i in range(len(ligne.ligne)-3):
+                    if ligne.ligne[i:i+3] == ["0"]+[win_loose]+["0"] :
+                        chance = randint(0, 1)
+                        if chance == 0 :
+                            Ligne.choose_ligne_token(i+3, ia)
+                            return print("\ndebug : nexto-right")
                         else :
-                            if temp == [win_loose]*3 and Ligne.list_inst_ligne[i-1].ligne[ligne+1] == "0":
-                                Ligne.choose_ligne_token(ligne+2, ia)
-                                return print("\ndebug : gauche bas")
-
+                            Ligne.choose_ligne_token(i+1, ia)
+                            return print("\ndebug : nexto-gauche")
 
         # si on ne peut pas bloquer une win ou win jouer "aléatoirement"
 
         choix = None
-
-        con = randint(0,6)
-        if not con :
-            choix = randint(3,5)
-        else :
-            con = randint(0,1)
-            if not con :
-                choix = randint(2,6)
-            else :
-                choix = randint(1,7)
+        choix = randint(1,7)
 
         while Ligne.list_inst_ligne[len(Ligne.list_inst_ligne)-1].ligne[choix-1] in ["1", "2"] :
             choix = randint(1,7)
@@ -169,11 +183,15 @@ class Ligne():
             return print("\ndebug : random")
 
     def action(joueur):
-        global running, turnpass
+        global running, turnpass, game_mode, player1, player2
         choix = input("\n > ")
         print(joueur)
         if choix == "ia" :
-            Ligne.ia_move()
+            turnpass = True
+            Ligne.ia_move(joueur)
+            if running == True and game_mode == "2" :
+                time.sleep(uniform(0.5, 1.5))
+                Ligne.ia_move("2")
         elif choix.isdigit():
             colonne = int(choix)
             if colonne > 7 :
@@ -321,7 +339,7 @@ while running :
                 player1, player2  = player2, player1
 
     elif game_mode == "2" and running :
-        Ligne.action("1")
+        Ligne.action(player1)
         if not running :
             display_menu()
 

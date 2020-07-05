@@ -255,8 +255,6 @@ class User():
                 for ligne in Ligne.list_inst_ligne :
                     if ligne1.ligne[colonne-1] in ["1", "2"] :
                         return
-                player1, player2  = player2, player1
-
                 Token.place_token(colonne, joueur)
 
             elif choix == "back":
@@ -264,6 +262,8 @@ class User():
 
             else :
                 User.user_move(joueur)
+
+            player1, player2 = player2, player1
 
 class Token():
 
@@ -348,6 +348,7 @@ class Win_condition():
 
         # si égalité
 
+
         def draw():
             global running
             if "0" in ligne1.ligne :
@@ -395,7 +396,7 @@ while running :
 
     elif game_mode == "2" and running :
         Win_condition.draw()
-        User.user_move(player1)
+        User.user_move("1")
         if not running :
             Menu.display_menu()
         else :

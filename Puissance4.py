@@ -1,9 +1,11 @@
 
+# module
+
 from random import *
 
-from colored import *
-
 import time
+
+from colored import *
 
 color1 = fg('cyan')
 color2 = fg('red')
@@ -33,13 +35,11 @@ class Menu():
     # choix du mode
 
     def menu():
-        global game_mode, running, turnpass, player1, player2, ia
+        global game_mode, running, turnpass, player1, player2
         game_mode = input("\n > ")
         if game_mode == "1" or game_mode == "2" or game_mode == "3" :
             turnpass = False
             running = True
-            ia1 = "1"
-            ia2 = "2"
             player1 = "1"
             player2 = "2"
             Board.initialize_board()
@@ -353,6 +353,7 @@ class Win_condition():
             if "0" in ligne1.ligne :
                 return
             else :
+                Board.display_board(4, None)
                 print("\n"+color3+" DRAW"+reset+"\n")
                 running = False
                 input("\n > ")
@@ -369,6 +370,7 @@ ligne1 = Ligne()
 # initialisation des variables
 
 running = True
+fst_ia = "1"
 player1 = "1"
 player2 = "2"
 game_mode = "1"
@@ -411,4 +413,12 @@ while running :
         Ia.ia_move(ia1)
         ia1, ia2 = ia2, ia1
         if not running :
+            if fst_ia == "1" :
+                fst_ia = "2"
+                ia1 = "2"
+                ia2 = "1"
+            else :
+                fst_ia = "1"
+                ia1 = "1"
+                ia2 = "2"
             Menu.display_menu()

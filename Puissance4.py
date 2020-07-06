@@ -29,13 +29,13 @@ class Menu():
 
     def display_menu():
         print("\n"*3)
-        print("\n"+color1+" 1"+reset+" : Local\n"+color1+" 2"+reset+" : Contre l'IA\n"+color1+" 3"+reset+" : IA VS IA\n"+color1+" 4"+reset+" : Exit")
+        print("\n"+color1+" 1"+reset+" : Local\n"+color1+" 2"+reset+" : Contre l'IA\n"+color1+" 3"+reset+" : IA VS IA\n"+color1+" 4"+reset+" : Regles\n\n"+color1+" 5"+reset+" : Exit")
         Menu.menu()
 
     # choix du mode
 
     def menu():
-        global game_mode, running, turnpass, player1, player2
+        global game_mode, running, turnpass, player1, player2, gravity, token_win, token_width, token_height, p1symb, p2symb
         game_mode = input("\n > ")
         if game_mode == "1" or game_mode == "2" or game_mode == "3" :
             running = True
@@ -43,8 +43,12 @@ class Menu():
             player2 = p2symb
             Board.initialize_board()
             Board.display_board(token_width, None, 0.1)
-        elif game_mode == "4"  :
+        elif game_mode == "4" :
+            game_start()
+
+        elif game_mode == "5"  :
             running = False
+
         else :
             Menu.menu()
 
@@ -68,16 +72,17 @@ class Board():
         # affichage des lignes
 
         print("\n"*10)
-        numéro_colonne = " "+"|".join([f"{color4 + str(i+1) + reset}" for i in range(token_width)])
+        numéro_colonne = "    "+"|".join([f"{color4 + str(i+1) + reset}" for i in range(token_width)])
 
 
         triangle_list = []
         for colonnes in range(token_width):
             triangle_list.append("▾")
         triangle_list[colonne-1] = color+triangle_list[colonne-1]+reset
-        triangle = " "+" ".join(triangle_list)
+        triangle = "    "+" ".join(triangle_list)
 
         x = 1
+        nb_coté = len(Ligne.list_inst_ligne)
         time.sleep(startime)
         print(numéro_colonne)
         time.sleep(startime)
@@ -92,14 +97,18 @@ class Board():
 
             tableau = "|".join(ligne)
             time.sleep(startime)
-            print(" "+tableau)
+            if gravity == False :
+                print(color4+str(nb_coté)+reset+" ▸ "+tableau+" ◂ "+color4+str(nb_coté)+reset)
+            else :
+                print("    "+tableau)
+            nb_coté -= 1
             x += 1
 
         triangle_list = []
         for colonnes in range(token_width):
             triangle_list.append("▴")
         triangle_list[colonne-1] = color+triangle_list[colonne-1]+reset
-        triangle = " "+" ".join(triangle_list)
+        triangle = "    "+" ".join(triangle_list)
 
         time.sleep(startime)
         print(triangle)
@@ -115,7 +124,7 @@ class Ia():
             for hauteur in range(token_height):
                 for i in range((token_width+1)-token_win):
                     temp = Ligne.list_inst_ligne[hauteur].ligne[i:i+token_win]
-                    if hauteur > 1 :
+                    if hauteur > 1 and gravity == True :
                         if temp == [win_loose]*(token_win-1)+[emptysymb] and Ligne.list_inst_ligne[hauteur-2].ligne[i+token_win-1] == emptysymb or temp == [win_loose]*(token_win-1)+[emptysymb] and not Ligne.list_inst_ligne[hauteur-1].ligne[i+token_win-1] == emptysymb :
                             Token.place_token(i+token_win, ia)
                             return print("\ndebug : horizontale devant haut")
@@ -132,7 +141,7 @@ class Ia():
                             Token.place_token(i+2, ia)
                             return print("\ndebug : horizontale milieu - haut")
 
-                    if hauteur == 1 :
+                    if hauteur == 1 and gravity == True :
                         if temp == [win_loose]*(token_win-1)+[emptysymb] and not Ligne.list_inst_ligne[hauteur-1].ligne[i+(token_win-1)] == emptysymb :
                             Token.place_token(i+token_win, ia)
                             return print("\ndebug : horizontale devant middle")
@@ -149,21 +158,21 @@ class Ia():
                             Token.place_token(i+2, ia)
                             return print("\ndebug : horizontale milieu - middle")
 
-                    elif hauteur == 0 :
+                    elif hauteur == 0 or gravity == False :
                         if temp == [win_loose]*(token_win-1)+[emptysymb] :
-                            Token.place_token(i+token_win, ia)
+                            Token.place_token(i+token_win, ia, hauteur+1)
                             return print("\ndebug : horizontale devant bas")
 
                         if temp == [emptysymb]+[win_loose]*(token_win-1) :
-                            Token.place_token(i+1, ia)
+                            Token.place_token(i+1, ia, hauteur+1)
                             return print("\ndebug : horizontale derrière bas")
 
                         if temp == [win_loose]*(token_win-2)+["0"]+[win_loose]:
-                            Token.place_token(i+(token_win-1), ia)
+                            Token.place_token(i+(token_win-1), ia, hauteur+1)
                             return print("\ndebug : horizontale milieu + bas")
 
                         if temp == [win_loose]+[emptysymb]+[win_loose]*(token_win-2) :
-                            Token.place_token(i+2, ia)
+                            Token.place_token(i+2, ia, hauteur+1)
                             return print("\ndebug : horizontale milieu - bas")
 
                 # verticale
@@ -171,9 +180,22 @@ class Ia():
             for ligne in range(token_width) :
                 for i in range((token_height+1)-token_win) :
                     temp = [Ligne.list_inst_ligne[i+x].ligne[ligne] for x in range(token_win)]
+
                     if temp == [win_loose]*(token_win-1)+[emptysymb] :
-                        Token.place_token(ligne+1, ia)
-                        return print("\ndebug : vertical")
+                        Token.place_token(ligne+1, ia, i+token_win)
+                        return print("\ndebug : vertical +")
+
+                    elif temp == [emptysymb]+[win_loose]*(token_win-1) :
+                        Token.place_token(ligne+1, ia, i+1)
+                        return print("\ndebug : vertical -")
+
+                    elif temp == [win_loose]*(token_win-2)+[emptysymb]+[win_loose] :
+                        Token.place_token(ligne+1, ia, i+(token_win-1))
+                        return print("\ndebug : vertical middle +")
+
+                    elif temp == [win_loose]+[emptysymb]+[win_loose]*(token_win-2) :
+                        Token.place_token(ligne+1, ia, i+2)
+                        return print("\ndebug : vertical middle -")
 
                 #diagonales
 
@@ -183,20 +205,20 @@ class Ia():
                 for i in range((token_height+1)-token_win):
                     temp = [Ligne.list_inst_ligne[i+x].ligne[ligne+1*x] for x in range(token_win)]
                     if temp == [win_loose]*(token_win-1)+[emptysymb] and Ligne.list_inst_ligne[i+1].ligne[ligne+(token_win-1)] == emptysymb or temp == [win_loose]*(token_win-1)+[emptysymb] and not Ligne.list_inst_ligne[i+2].ligne[ligne+(token_win-1)] == emptysymb :
-                        Token.place_token(ligne+token_win, ia)
+                        Token.place_token(ligne+token_win, ia, i+token_win)
                         return print("\ndebug : droite haut")
 
                     if temp == [win_loose]*(token_win-2)+[emptysymb]+[win_loose] and Ligne.list_inst_ligne[i].ligne[ligne+(token_win-2)] == emptysymb or temp == [win_loose]*(token_win-2)+[emptysymb]+[win_loose] and not Ligne.list_inst_ligne[i+1].ligne[ligne+(token_win-2)] == emptysymb :
-                        Token.place_token(ligne+(token_win-1), ia)
+                        Token.place_token(ligne+(token_win-1), ia, i+(token_win-1))
                         return print("\ndebug : droite middle +")
                         # droite bas
 
                     if temp == [emptysymb]+[win_loose]*(token_win-1) :
-                        Token.place_token(ligne+1, ia)
+                        Token.place_token(ligne+1, ia, i+1)
                         return print("\ndebug : droite bas")
 
                     if temp == [win_loose]+[emptysymb]+[win_loose]*(token_win-2) :
-                        Token.place_token(ligne+2, ia)
+                        Token.place_token(ligne+2, ia, i+2)
                         return print("\ndebug : droite middle -")
 
                 # gauche haut
@@ -205,22 +227,22 @@ class Ia():
                 for i in range((token_height+1)-token_win):
                     temp = [Ligne.list_inst_ligne[i+x].ligne[ligne-1*x] for x in range(token_win)]
                     if temp == [win_loose]*(token_win-1)+[emptysymb] and Ligne.list_inst_ligne[i+1].ligne[ligne-(token_win-1)] == emptysymb or temp == [win_loose]*(token_win-1)+[emptysymb] and not Ligne.list_inst_ligne[i+2].ligne[ligne-(token_win-1)] == emptysymb :
-                        Token.place_token(ligne-(token_win-2), ia)
+                        Token.place_token(ligne-(token_win-2), ia, i+token_win)
                         print(win_loose)
                         return print("\ndebug : gauche haut")
 
-                    if temp == [win_loose]*2+[emptysymb]+[win_loose] and Ligne.list_inst_ligne[i].ligne[ligne-(token_win-2)] == emptysymb or temp == [win_loose]*(token_win-2)+[emptysymb]+[win_loose] and not Ligne.list_inst_ligne[i+1].ligne[ligne-(token_win-2)] == emptysymb :
-                        Token.place_token(ligne-(token_win-3), ia)
+                    if temp == [win_loose]*(token_win-2)+[emptysymb]+[win_loose] and Ligne.list_inst_ligne[i].ligne[ligne-(token_win-2)] == emptysymb or temp == [win_loose]*(token_win-2)+[emptysymb]+[win_loose] and not Ligne.list_inst_ligne[i+1].ligne[ligne-(token_win-2)] == emptysymb :
+                        Token.place_token(ligne-(token_win-3), ia, i+(token_win-1))
                         return print("\ndebug : gauche middle +")
 
                         # gauche bas
 
                     if temp == [emptysymb]+[win_loose]*(token_win-1) :
-                        Token.place_token(ligne+1, ia)
+                        Token.place_token(ligne+1, ia, i+1)
                         return print("\ndebug : gauche bas")
 
                     if temp == [win_loose]+[emptysymb]+[win_loose]*(token_win-2) :
-                        Token.place_token(ligne, ia)
+                        Token.place_token(ligne, ia, i+2)
                         return print("\ndebug : gauche middle -")
 
             # si on ne peut pas bloquer une win ou win jouer "aléatoirement"
@@ -230,61 +252,125 @@ class Ia():
                 for i in range(token_width-2):
                     temp = Ligne.list_inst_ligne[hauteur-1].ligne[i:i+3]
                     if temp == [emptysymb]+[win_loose]+[emptysymb] :
-                        if i+2 < 4 :
-                            Token.place_token(i+3, ia)
+                        rightleft = randint(0,1)
+                        if rightleft :
+                            Token.place_token(i+3, ia, hauteur)
                             return print("\ndebug : nexto right")
-                        elif i+2 > 4 :
-                            Token.place_token(i+1, ia)
+                        else :
+                            Token.place_token(i+1, ia, hauteur)
                             return print("\ndebug : nexto left")
 
-        choix = randint(1,token_width)
+        col = randint(1,token_width)
+        lign = randint(1,token_width)
 
-        while Ligne.list_inst_ligne[-1].ligne[choix-1] in [p1symb, p2symb] :
-            choix = randint(1,token_width)
+        if gravity == False :
+
+            while Ligne.list_inst_ligne[lign-1].ligne[col-1] in [p1symb, p2symb] :
+                col = randint(1,token_width)
+                lign = randint(1,token_height)
+            else :
+                Token.place_token(col, ia, lign)
+                return print("\ndebug : random")
+
         else :
-            Token.place_token(choix, ia)
-            return print("\ndebug : random")
+
+            while Ligne.list_inst_ligne[-1].ligne[col-1] in [p1symb, p2symb] :
+                col = randint(1,token_width)
+            else :
+                Token.place_token(col, ia)
+                return print("\ndebug : random")
 
 class User():
 
     def user_move(joueur):
         global running, game_mode, player1, player2
+        lign = ""
         if running == True :
-            choix = input("\n > ")
-            print("\ndebug : "+joueur)
-            if choix == "ia" :
-                Ia.ia_move(joueur)
-                if game_mode == "1":
-                    player1, player2 = player2, player1
-            elif choix.isdigit():
-                colonne = int(choix)
-                if colonne > token_width :
-                    colonne = token_width
-                elif colonne < 1 :
-                    colonne = 1
-                if Ligne.list_inst_ligne[-1].ligne[colonne-1] in [p1symb, p2symb] :
-                    User.user_move(joueur)
-                else :
+            print("\ndebug : next player "+joueur)
+            if gravity == False :
+
+                col = input("\ncolumn > ")
+                lign = input("\nlign > ")
+
+                if lign == "ia" or col == "ia" :
                     if game_mode == "1":
                         player1, player2 = player2, player1
-                    Token.place_token(colonne, joueur)
+                    Ia.ia_move(joueur)
 
-            elif choix == "back":
-                running = False
+
+                elif lign.isdigit() and col.isdigit() :
+
+                    colonne = int(col)
+
+                    if colonne > token_width :
+                        colonne = token_width
+                    elif colonne < 1 :
+                        colonne = 1
+
+                    ligne = int(lign)
+
+                    if ligne > token_height :
+                        ligne = token_height
+                    elif ligne < 1 :
+                        ligne = 1
+
+                    if Ligne.list_inst_ligne[ligne-1].ligne[colonne-1] in [p1symb, p2symb] :
+                        User.user_move(joueur)
+                    else :
+                        if game_mode == "1":
+                            player1, player2 = player2, player1
+                        Token.place_token(colonne, joueur, ligne)
+
+                elif col == "back" or lign == "back":
+                    running = False
+
+                else :
+                    User.user_move(joueur)
 
             else :
-                User.user_move(joueur)
+                col = input("\ncolumn > ")
+
+                if col == "ia" :
+                    Ia.ia_move(joueur)
+                    if game_mode == "1":
+                        player1, player2 = player2, player1
+
+                elif col.isdigit() :
+
+                    colonne = int(col)
+
+                    if colonne > token_width :
+                        colonne = token_width
+                    elif colonne < 1 :
+                        colonne = 1
+
+
+                    if Ligne.list_inst_ligne[-1].ligne[colonne-1] in [p1symb, p2symb] :
+                        User.user_move(joueur)
+                    else :
+                        if game_mode == "1":
+                            player1, player2 = player2, player1
+                        Token.place_token(colonne, joueur)
+
+                elif col == "back":
+                    running = False
+
+                else :
+                    User.user_move(joueur)
 
 class Token():
 
-    def place_token(colonne, player):
+    def place_token(colonne, player, ligne=None):
 
-        for ligne in Ligne.list_inst_ligne :
-            if ligne.ligne[colonne-1] in [p1symb, p2symb] :
-                pass
-            else :
-                ligne.ligne[colonne-1] = player
-                break
+        if gravity == False :
+            Ligne.list_inst_ligne[ligne-1].ligne[colonne-1] = player
+        else :
+            for ligne in Ligne.list_inst_ligne :
+                if ligne.ligne[colonne-1] in [p1symb, p2symb] :
+                    pass
+                else :
+                    ligne.ligne[colonne-1] = player
+                    break
         Win_condition.is_win(colonne, player)
         if running == True :
             Board.display_board(colonne, player)
@@ -294,8 +380,6 @@ class Win_condition():
         # verification win
 
         def is_win(colonne, player):
-
-            Win_condition.draw(player, colonne)
 
             Win_condition.horrizontal(player, colonne)
 
@@ -307,6 +391,8 @@ class Win_condition():
 
             for ligne in range(token_win-1, token_width) :
                 Win_condition.diag(-1, ligne, player, colonne)
+
+            Win_condition.draw(player, colonne)
 
         # diagonale
 
@@ -364,13 +450,23 @@ class Win_condition():
 
         def draw(player, colonne):
             global running
-            if emptysymb in Ligne.list_inst_ligne[-1].ligne :
-                return
+            if gravity == False :
+                for ligne in Ligne.list_inst_ligne :
+                    if emptysymb in ligne.ligne :
+                        return
+                else :
+                    Board.display_board(colonne, player)
+                    print("\n"+color3+" DRAW"+reset+"\n")
+                    running = False
+                    input("\n > ")
             else :
-                Board.display_board(colonne, player)
-                print("\n"+color3+" DRAW"+reset+"\n")
-                running = False
-                input("\n > ")
+                if emptysymb in Ligne.list_inst_ligne[-1].ligne :
+                    return
+                else :
+                    Board.display_board(colonne, player)
+                    print("\n"+color3+" DRAW"+reset+"\n")
+                    running = False
+                    input("\n > ")
 
 # initialisation des variables
 
@@ -378,6 +474,7 @@ emptysymb = "0"
 p1symb = "1"
 p2symb = "2"
 
+gravity = True
 running = True
 fst_ia = p1symb
 player1 = p1symb
@@ -386,20 +483,47 @@ game_mode = ""
 ia1 = p1symb
 ia2 = p2symb
 
-# constante game_var
+token_win = None
+token_width = None
+token_height = None
 
-token_win = 4
-token_width = 7
-token_height = 6
+# definir constante game_var
 
-# instansiation des lignes
+def game_start():
 
-for ligne in range(token_height):
-    ligne = Ligne()
+    global running, token_win, token_width, token_height, gravity
+    running = True
+    twin = input("\nEntrez le "+color1+"NOMBRE DE JETON"+reset+" à aligner pour gagner > ")
+    twidth = input("\nEntrez la "+color1+"LARGEUR"+reset+" du tableau > ")
+    theight = input("\nEntrez la "+color1+"HAUTEUR"+reset+" du tableau > ")
+    isgravity = input("\nActiver la "+color1+"GRAVITÉ"+reset+" ? (yes/no) > ")
+    if isgravity == "yes" :
+        gravity = True
+    elif isgravity == "no" :
+        gravity = False
+    if twin.isdigit() and twidth.isdigit() and theight.isdigit() :
+        token_win = int(twin)
+        token_width = int(twidth)
+        token_height = int(theight)
+        if token_win > token_width and token_win > token_height :
+            running = False
+            print("\n"+color2+"Erreur Systeme !"+reset)
+    else :
+        running = False
+        print("\n"+color2+"Erreur Systeme !"+reset)
 
 # Entrer dans la game loop
 
-Menu.display_menu()
+    if running == True :
+
+        # instansiation des lignes
+        Ligne.list_inst_ligne = []
+        for ligne in range(token_height):
+            ligne = Ligne()
+
+        Menu.display_menu()
+
+game_start()
 
 # game loop
 

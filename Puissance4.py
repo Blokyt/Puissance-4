@@ -367,7 +367,6 @@ class Ia():
         else :
             return False
 
-
 class User():
 
     def user_main(joueur):
@@ -430,14 +429,6 @@ class User():
             else :
                 User.user_main_no_grav(joueur)
 
-    def user_ia_move(joueur, col, lign=""):
-
-        if col == "ia" or lign == "ia" :
-            Ia.ia_move(joueur)
-            return True
-        else :
-            return False
-
     def user_move_grav(joueur, col, p1symb, p2symb):
 
         global player1, player2
@@ -459,9 +450,13 @@ class User():
             player1, player2 = player2, player1
             Token.place_token(col, joueur, lign)
 
+    def user_ia_move(joueur, col, lign=""):
 
-
-
+        if col == "ia" or lign == "ia" :
+            Ia.ia_move(joueur)
+            return True
+        else :
+            return False
 
 class Token():
 
@@ -583,7 +578,7 @@ token_win = None
 token_width = None
 token_height = None
 
-# definir constante game_var
+# definir regles jeu
 
 def game_start():
 

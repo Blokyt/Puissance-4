@@ -42,7 +42,10 @@ class Menu():
             player1 = p1symb
             player2 = p2symb
             Board.initialize_board()
-            Board.display_board(token_width, None, None, 0.1)
+            if game_mode == "3" and speed_mode :
+                pass
+            else :
+                Board.display_board(token_width, None, None, 0.1)
         elif game_mode == "4" :
             game_start()
 
@@ -61,7 +64,7 @@ class Board():
         for ligne in Ligne.list_inst_ligne:
             ligne.colonne = ["0"]*token_width
 
-    def display_board(colonne, player, lign=None, startime=0.025, color=""):
+    def display_board(colonne, player, lign=None, startime=0.05, color=""):
 
         # permet d'indiquer ou et qui à jouer le dernier coup
 
@@ -462,6 +465,8 @@ class Token():
 
     def place_token(colonne, player, ligne=None):
 
+        global speed_mode
+
         if gravity == False :
             Ligne.list_inst_ligne[ligne-1].colonne[colonne-1] = player
         else :
@@ -472,8 +477,12 @@ class Token():
                     ligne.colonne[colonne-1] = player
                     break
         Win_condition.is_win(colonne, player)
-        if running == True :
-            Board.display_board(colonne, player, ligne)
+
+        if running :
+            if game_mode == "3" and speed_mode :
+                pass
+            else :
+                Board.display_board(colonne, player, ligne)
 
 class Win_condition():
 
@@ -488,7 +497,8 @@ class Win_condition():
                 Win_condition.diag(1, ligne, player, colonne)
             for ligne in range(token_win-1, token_width) :
                 Win_condition.diag(-1, ligne, player, colonne)
-            Win_condition.draw(player, colonne)
+            if running :
+                Win_condition.draw(player, colonne)
 
         # diagonale
 
@@ -577,21 +587,36 @@ ia2 = p2symb
 token_win = None
 token_width = None
 token_height = None
+speed_mode = False
 
 # definir regles jeu
 
 def game_start():
 
-    global running, token_win, token_width, token_height, gravity
+    global running, token_win, token_width, token_height, gravity, speed_mode
     running = True
     twin = input("\nEntrez le "+color1+"NOMBRE DE JETON"+reset+" à aligner pour gagner > ")
     twidth = input("\nEntrez la "+color1+"COLONNES"+reset+" du tableau > ")
     theight = input("\nEntrez la "+color1+"LIGNES"+reset+" du tableau > ")
     isgravity = input("\nActiver la "+color1+"GRAVITÉ"+reset+" ? (yes/no) > ")
+    ispeed_mode = input("\nActiver le "+color1+"SPEED MODE"+reset+" ? (yes/no) > ")
+
+    # affectations des variables
+
+    if ispeed_mode == "yes" :
+        speed_mode = True
+    elif ispeed_mode == "no" :
+        speed_mode = False
+    else :
+        speed_mode = False
+
     if isgravity == "yes" :
         gravity = True
     elif isgravity == "no" :
         gravity = False
+    else :
+        gravity = True
+
     if twin.isdigit() and twidth.isdigit() and theight.isdigit() :
         token_win = int(twin)
         token_width = int(twidth)
@@ -650,7 +675,8 @@ while running :
     # ia vs ia
 
     elif game_mode == "3" and running :
-        time.sleep(uniform(0.5, 1.5))
+        if not speed_mode :
+            time.sleep(0.25)
         Ia.ia_move(ia1)
         ia1, ia2 = ia2, ia1
         if not running :

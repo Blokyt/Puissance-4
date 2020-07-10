@@ -35,7 +35,7 @@ class Menu():
     # choix du mode
 
     def menu():
-        global game_mode, running, turnpass, player1, player2, gravity, token_win, token_width, token_height, p1symb, p2symb
+        global game_mode, running, player1, player2, gravity, token_win, token_width, token_height, p1symb, p2symb
         game_mode = input("\n > ")
         if game_mode == "1" or game_mode == "2" or game_mode == "3" :
             running = True
@@ -47,7 +47,7 @@ class Menu():
             else :
                 Board.display_board(token_width, None, None, 0.1)
         elif game_mode == "4" :
-            game_start()
+            Game_start.start()
 
         elif game_mode == "5"  :
             running = False
@@ -64,7 +64,7 @@ class Board():
         for ligne in Ligne.list_inst_ligne:
             ligne.colonne = ["0"]*token_width
 
-    def display_board(colonne, player, lign=None, startime=0.05, color=""):
+    def display_board(colonne, player, lign=None, startime=0.1, color=""):
 
         # permet d'indiquer ou et qui à jouer le dernier coup
 
@@ -476,7 +476,7 @@ class Token():
                 else :
                     ligne.colonne[colonne-1] = player
                     break
-        Win_condition.is_win(colonne, player)
+        Win_condition.is_win(colonne, player, ligne)
 
         if running :
             if game_mode == "3" and speed_mode :
@@ -488,36 +488,36 @@ class Win_condition():
 
         # verification win
 
-        def is_win(colonne, player):
+        def is_win(colonne, player, lign):
 
-            Win_condition.horrizontal(player, colonne)
-            for ligne in range(token_width) :
-                Win_condition.diag(0, ligne, player, colonne)
+            Win_condition.horrizontal(player, colonne, lign)
+            for ligne in range(token_width):
+                Win_condition.diag(0, ligne, player, colonne, lign)
             for ligne in range((token_width+1)-token_win) :
-                Win_condition.diag(1, ligne, player, colonne)
+                Win_condition.diag(1, ligne, player, colonne, lign)
             for ligne in range(token_win-1, token_width) :
-                Win_condition.diag(-1, ligne, player, colonne)
+                Win_condition.diag(-1, ligne, player, colonne, lign)
             if running :
-                Win_condition.draw(player, colonne)
+                Win_condition.draw(player, colonne, lign)
 
         # diagonale
 
-        def diag(calc, ligne, player, colonne):
+        def diag(calc, ligne, player, colonne, lign):
 
-            for win_loose in [p1symb, p2symb] :
+            for win_loose in [p1symb, p2symb]:
                 for i in range((token_height+1)-token_win):
                     temp = [Ligne.list_inst_ligne[i+x].colonne[ligne+calc*x] for x in range(token_win)]
-                    if temp == [win_loose]*token_win :
+                    if temp == [win_loose]*token_win:
                         Win_condition.light_diag(calc, i, ligne)
-                        Win_condition.win(player, colonne)
+                        Win_condition.win(player, colonne, lign)
                         break
 
         # horizontale
 
-        def horrizontal(player, colonne):
+        def horrizontal(player, colonne, lign):
 
-            for win_loose in [p1symb, p2symb] :
-                for ligne in Ligne.list_inst_ligne :
+            for win_loose in [p1symb, p2symb]:
+                for ligne in Ligne.list_inst_ligne:
                     for i in range((token_width+1)-token_win):
                         if ligne.colonne[i:i+token_win] == [win_loose]*token_win :
 
@@ -526,7 +526,7 @@ class Win_condition():
                             for itération in range(token_win) :
                                 ligne.colonne[i] = color3+ligne.colonne[i]+reset
                                 i +=1
-                            Win_condition.win(player, colonne)
+                            Win_condition.win(player, colonne, lign)
                             break
 
         # mettre en surbrillance les "diags"
@@ -539,8 +539,8 @@ class Win_condition():
 
         # si victoire
 
-        def win(player, colonne):
-            Board.display_board(colonne, player)
+        def win(player, colonne, lign):
+            Board.display_board(colonne, player, lign)
             global running
             if player == p1symb:
                 print("\n"+color1+"BLUE"+reset+color3+" WIN"+reset+"\n")
@@ -551,14 +551,14 @@ class Win_condition():
 
         # si égalité
 
-        def draw(player, colonne):
+        def draw(player, colonne, lign):
             global running
             if gravity == False :
                 for ligne in Ligne.list_inst_ligne :
                     if emptysymb in ligne.colonne :
                         return
                 else :
-                    Board.display_board(colonne, player)
+                    Board.display_board(colonne, player, lign)
                     print("\n"+color3+" DRAW"+reset+"\n")
                     running = False
                     input("\n > ")
@@ -591,65 +591,75 @@ speed_mode = False
 
 # definir regles jeu
 
-def game_start():
+class Game_start():
 
-    global running, token_win, token_width, token_height, gravity, speed_mode
-    running = True
-    twin = input("\nEntrez le "+color1+"NOMBRE DE JETON"+reset+" à aligner pour gagner > ")
-    twidth = input("\nEntrez la "+color1+"COLONNES"+reset+" du tableau > ")
-    theight = input("\nEntrez la "+color1+"LIGNES"+reset+" du tableau > ")
-    isgravity = input("\nActiver la "+color1+"GRAVITÉ"+reset+" ? (yes/no) > ")
-    ispeed_mode = input("\nActiver le "+color1+"SPEED MODE"+reset+" ? (yes/no) > ")
-
-    # affectations des variables
-
-    if ispeed_mode == "yes" :
-        speed_mode = True
-    elif ispeed_mode == "no" :
-        speed_mode = False
-    else :
-        speed_mode = False
-
-    if isgravity == "yes" :
-        gravity = True
-    elif isgravity == "no" :
-        gravity = False
-    else :
-        gravity = True
-
-    if twin.isdigit() and twidth.isdigit() and theight.isdigit() :
-        token_win = int(twin)
-        token_width = int(twidth)
-        token_height = int(theight)
-        if token_win > token_width and token_win > token_height :
-            running = False
-            print("\n"+color2+"Erreur Systeme !"+reset)
-    else :
-        running = False
-        print("\n"+color2+"Erreur Systeme !"+reset)
-
-# Entrer dans la game loop
-
-    if running == True :
-
-        # instansiation des lignes
+    def start():
+        Game_start.token()
+        Game_start.col()
+        Game_start.lign()
+        Game_start.gravity()
+        Game_start.speed_mode()
 
         Ligne.list_inst_ligne = []
         for ligne in range(token_height):
-            ligne = Ligne()
+              ligne = Ligne()
         Menu.display_menu()
 
-game_start()
+    def col():
+        global  token_width
+        twidth = input("\nEntrez la " + color1 + "COLONNES" + reset + " du tableau > ")
+        if twidth.isdigit() and int(twidth) > 0 :
+            token_width = int(twidth)
+        else :
+            Game_start.col()
+
+    def lign():
+        global token_height
+        theight = input("\nEntrez la " + color1 + "LIGNES" + reset + " du tableau > ")
+        if theight.isdigit() and int(theight) > 0 :
+            token_height = int(theight)
+        else :
+            Game_start.lign()
+
+    def token() :
+
+        global token_win
+        twin = input("\nEntrez le " + color1 + "NOMBRE DE JETON" + reset + " à aligner pour gagner > ")
+        if twin.isdigit() and int(twin) > 0 :
+            token_win = int(twin)
+        else :
+            Game_start.token()
+
+    def gravity():
+        global gravity
+        isgravity = input("\nActiver la " + color1 + "GRAVITÉ" + reset + " ? (yes/no) > ")
+        if isgravity == "yes":
+            gravity = True
+        elif isgravity == "no":
+            gravity = False
+        else:
+            Game_start.gravity()
+
+    def speed_mode():
+        global speed_mode
+        ispeed_mode = input("\nActiver le " + color1 + "SPEED MODE" + reset + " ? (yes/no) > ")
+        if ispeed_mode == "yes" :
+            speed_mode = True
+        elif ispeed_mode == "no" :
+            speed_mode = False
+        else :
+            Game_start.speed_mode()
+
+Game_start.start()
 
 # game loop
 
 while running :
 
-    print("\ndebug : next player"+player1)
-
     # local
 
     if game_mode == "1" and running :
+        print("\ndebug : next player"+player1)
         if gravity == True :
             User.user_main(player1)
         else :
@@ -660,6 +670,7 @@ while running :
     # vs ia
 
     elif game_mode == "2" and running :
+        print("\ndebug : next player"+player1)
         if gravity == True :
             User.user_main(p1symb)
         else :
@@ -675,6 +686,7 @@ while running :
     # ia vs ia
 
     elif game_mode == "3" and running :
+        print("\ndebug : next ia"+ia1)
         if not speed_mode :
             time.sleep(0.25)
         Ia.ia_move(ia1)
@@ -682,10 +694,8 @@ while running :
         if not running :
             if fst_ia == p1symb :
                 fst_ia = p2symb
-                ia1 = p2symb
-                ia2 = p1symb
+                ia1, ia2 = p2symb, p1symb
             else :
                 fst_ia = p1symb
-                ia1 = p1symb
-                ia2 = p2symb
+                ia1, ia2 = p1symb, p2symb
             Menu.display_menu()
